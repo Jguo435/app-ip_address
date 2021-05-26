@@ -23,7 +23,6 @@ const path = require('path');
  */
 const { getIpv4MappedIpv6Address } = require(path.join(__dirname, 'ipv6.js'));
 
-
 /**
  * Calculate and return the first host IP address from a CIDR subnet.
  * @param {string} cidrStr - The IPv4 subnet expressed
@@ -37,6 +36,7 @@ function getFirstIpAddress(cidrStr, callback) {
   // Initialize return arguments for callback
   let firstIpAddress = null;
   let callbackError = null;
+  let mapAddress = null;
 
   // Instantiate an object from the imported class and assign the instance to variable cidr.
   const cidr = new IPCIDR(cidrStr);
@@ -54,24 +54,25 @@ function getFirstIpAddress(cidrStr, callback) {
     callbackError = 'Error: Invalid CIDR passed to getFirstIpAddress.';
   } else {
     // If the passed CIDR is valid, call the object's toArray() method.
+    // And map ipv4 address to ipv6 address
     // Notice the destructering assignment syntax to get the value of the first array's element.
     [firstIpAddress] = cidr.toArray(options);
+    mapAddress = getIpv4MappedIpv6Address(firstIpAddress);
+    
   }
 
-  objecto = {ipv4: firstIpAddress, ipv6: getIpv4MappedIpv6Address(cidrStr)};
+
+  var addresses = {
+    ipv4: firstIpAddress,
+    ipv6: mapAddress,
+  };
   
   // Call the passed callback function.
   // Node.js convention is to pass error data as the first argument to a callback.
   // The IAP convention is to pass returned data as the first argument and error
   // data as the second argument to the callback function.
-  return callback(objecto, callbackError);
+  return callback(addresses, callbackError);
 }
-
-
-
-
-
-
 
 
 
